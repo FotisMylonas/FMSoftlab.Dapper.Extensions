@@ -1,4 +1,4 @@
-"# FMSoftlab.Dapper.Extensions" 
+# FMSoftlab.Dapper.Extensions
 
 A small Dapper extension for supporting more easily Sql Server table value parameters with Dapper.
 It gives you the chance to use a POCO class and pass it as a parameter to the query
