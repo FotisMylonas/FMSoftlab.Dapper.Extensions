@@ -4,6 +4,10 @@ A small Dapper extension for supporting more easily Sql Server table value param
 It gives you the chance to use a POCO class and pass it as a parameter to the query
 
 Example:
+```sql
+create type dbo.idlist as table (id nvarchar(5))
+```
+
 ```cs
 public class ListItem
 {
