@@ -9,7 +9,7 @@ using System.Data;
 using Dapper;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
-
+using static Dapper.SqlMapper;
 
 namespace FMSoftlab.Dapper.Extensions
 {
@@ -320,12 +320,24 @@ namespace FMSoftlab.Dapper.Extensions
             return drl;
         }
 
-        public static void AddTableValuedParam<T>(this DynamicParameters dyn, string paramName, string typeName, IEnumerable<T> data)
+        public static ICustomQueryParameter GetTableValuedParam<T>(string typeName, IEnumerable<T> data)
         {
+            ICustomQueryParameter res = null;
             var sqlDataRecords = GetSqlDataRecords<T>(data);
             if (sqlDataRecords?.Count() > 0)
             {
-                dyn.Add(name: paramName, value: sqlDataRecords.AsTableValuedParameter(typeName), direction: ParameterDirection.Input);
+                res = sqlDataRecords.AsTableValuedParameter(typeName);
+            }
+            return res;
+        }
+
+        public static void AddTableValuedParam<T>(this DynamicParameters dyn, string paramName, string typeName, IEnumerable<T> data)
+        {
+            var sqlDataRecords = GetSqlDataRecords(data);
+            if (sqlDataRecords?.Count() > 0)
+            {
+                ICustomQueryParameter param = GetTableValuedParam(typeName, data);
+                dyn.Add(name: paramName, value: param, direction: ParameterDirection.Input);
             }
         }
     }
