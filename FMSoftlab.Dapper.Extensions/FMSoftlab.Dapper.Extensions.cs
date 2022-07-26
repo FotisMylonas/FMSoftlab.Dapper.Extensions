@@ -320,23 +320,29 @@ namespace FMSoftlab.Dapper.Extensions
             return drl;
         }
 
-        public static ICustomQueryParameter GetTableValuedParam<T>(string typeName, IEnumerable<T> data)
+        private static ICustomQueryParameter GetTableValuedParam<T>(string typeName, IEnumerable<T> data)
         {
             ICustomQueryParameter res = null;
-            var sqlDataRecords = GetSqlDataRecords<T>(data);
-            if (sqlDataRecords?.Count() > 0)
+            if (data != null)
             {
-                res = sqlDataRecords.AsTableValuedParameter(typeName);
+                var sqlDataRecords = GetSqlDataRecords<T>(data);
+                if (sqlDataRecords?.Count() > 0)
+                {
+                    res = sqlDataRecords.AsTableValuedParameter(typeName);
+                }
             }
             return res;
+        }
+        public static ICustomQueryParameter GetTableValuedParam<T>(this IEnumerable<T> data, string typeName)
+        {
+            return GetTableValuedParam(typeName, data);
         }
 
         public static void AddTableValuedParam<T>(this DynamicParameters dyn, string paramName, string typeName, IEnumerable<T> data)
         {
-            var sqlDataRecords = GetSqlDataRecords(data);
-            if (sqlDataRecords?.Count() > 0)
+            if (data != null)
             {
-                ICustomQueryParameter param = GetTableValuedParam(typeName, data);
+                ICustomQueryParameter param = data.GetTableValuedParam(typeName);
                 dyn.Add(name: paramName, value: param, direction: ParameterDirection.Input);
             }
         }
