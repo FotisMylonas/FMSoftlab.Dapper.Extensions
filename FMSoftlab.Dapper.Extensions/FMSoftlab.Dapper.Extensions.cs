@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection;
-using Microsoft.SqlServer.Server;
-using System.Data;
+using Microsoft.Data.SqlClient.Server;
 using Dapper;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
-using static Dapper.SqlMapper;
+using System.Data;
 
 namespace FMSoftlab.Dapper.Extensions
 {
@@ -320,9 +319,9 @@ namespace FMSoftlab.Dapper.Extensions
             return drl;
         }
 
-        private static ICustomQueryParameter GetTableValuedParam<T>(string typeName, IEnumerable<T> data)
+        private static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(string typeName, IEnumerable<T> data)
         {
-            ICustomQueryParameter res = null;
+            SqlMapper.ICustomQueryParameter res = null;
             if (data != null)
             {
                 var sqlDataRecords = GetSqlDataRecords(data);
@@ -334,9 +333,9 @@ namespace FMSoftlab.Dapper.Extensions
             return res;
         }
 
-        private static ICustomQueryParameter GetTableValuedParam<T>(string typeName, ICollection<T> data)
+        private static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(string typeName, ICollection<T> data)
         {
-            ICustomQueryParameter res = null;
+            SqlMapper.ICustomQueryParameter res = null;
             if (data != null)
             {
                 var sqlDataRecords = GetSqlDataRecords(data);
@@ -347,11 +346,11 @@ namespace FMSoftlab.Dapper.Extensions
             }
             return res;
         }
-        public static ICustomQueryParameter GetTableValuedParam<T>(this IEnumerable<T> data, string typeName)
+        public static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(this IEnumerable<T> data, string typeName)
         {
             return GetTableValuedParam(typeName, data);
         }
-        public static ICustomQueryParameter GetTableValuedParam<T>(this ICollection<T> data, string typeName)
+        public static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(this ICollection<T> data, string typeName)
         {
             return GetTableValuedParam(typeName, data);
         }
@@ -359,7 +358,7 @@ namespace FMSoftlab.Dapper.Extensions
         {
             if (data != null)
             {
-                ICustomQueryParameter param = data.GetTableValuedParam(typeName);
+                SqlMapper.ICustomQueryParameter param = data.GetTableValuedParam(typeName);
                 dyn.Add(name: paramName, value: param, direction: ParameterDirection.Input);
             }
         }
@@ -367,7 +366,7 @@ namespace FMSoftlab.Dapper.Extensions
         {
             if (data != null)
             {
-                ICustomQueryParameter param = data.GetTableValuedParam(typeName);
+                SqlMapper.ICustomQueryParameter param = data.GetTableValuedParam(typeName);
                 dyn.Add(name: paramName, value: param, direction: ParameterDirection.Input);
             }
         }

@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 using Dapper;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -15,7 +15,7 @@ namespace FMSoftlab.Dapper.Extensions.Tests
 
     public class DapperCallParameters
     {
-        public object IdList { get; set; }
+        public SqlMapper.ICustomQueryParameter IdList { get; set; }
     }
     public class UnitTest1
     {
@@ -88,6 +88,32 @@ namespace FMSoftlab.Dapper.Extensions.Tests
                     con.Execute("drop type dbo.idlist");
                 }
             }
-        }     
+        }
+
+
+        [Fact]
+        public void Test4()
+        {
+            using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
+            {
+                con.Open();
+                try
+                {
+                    con.Execute("create type dbo.idlist as table (id nvarchar(5))");
+                    IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
+                    DapperCallParameters parameters = new()
+                    {
+                        IdList = idlist.GetTableValuedParam<ListItem>("dbo.idlist")
+                    };
+                    var results = con.Query<string>(@"select id from @idlist idlist", parameters).AsList<string>();
+                    Assert.Equal("1", results[0]);
+                    Assert.Equal("2", results[1]);
+                }
+                finally
+                {
+                    con.Execute("drop type dbo.idlist");
+                }
+            }
+        }
     }
 }
