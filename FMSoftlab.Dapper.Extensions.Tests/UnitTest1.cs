@@ -1,9 +1,9 @@
 using System;
 using Xunit;
 using Dapper;
-using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.SqlClient;
 
 namespace FMSoftlab.Dapper.Extensions.Tests
 {

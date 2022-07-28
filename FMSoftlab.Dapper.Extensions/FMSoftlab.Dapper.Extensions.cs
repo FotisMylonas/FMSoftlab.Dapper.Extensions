@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection;
-using Microsoft.Data.SqlClient.Server;
 using Dapper;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using Microsoft.SqlServer.Server;
 
 namespace FMSoftlab.Dapper.Extensions
 {
