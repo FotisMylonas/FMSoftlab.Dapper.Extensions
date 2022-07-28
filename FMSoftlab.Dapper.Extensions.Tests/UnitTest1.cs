@@ -3,7 +3,7 @@ using Xunit;
 using Dapper;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace FMSoftlab.Dapper.Extensions.Tests
 {

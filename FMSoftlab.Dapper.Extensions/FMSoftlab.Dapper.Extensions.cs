@@ -8,7 +8,7 @@ using Dapper;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
-using Microsoft.SqlServer.Server;
+using Microsoft.Data.SqlClient.Server;
 
 namespace FMSoftlab.Dapper.Extensions
 {
