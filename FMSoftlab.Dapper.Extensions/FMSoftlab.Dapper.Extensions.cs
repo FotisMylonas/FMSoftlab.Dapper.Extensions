@@ -284,7 +284,6 @@ namespace FMSoftlab.Dapper.Extensions
                 }
             }
         }
-
         private static IEnumerable<SqlDataRecord> GetSqlDataRecords<T>(IEnumerable<T> data)
         {
             PropertyInfo[] pinfo = typeof(T).GetProperties();
@@ -301,24 +300,6 @@ namespace FMSoftlab.Dapper.Extensions
             }
             return drl;
         }
-
-        private static IEnumerable<SqlDataRecord> GetSqlDataRecords<T>(ICollection<T> data)
-        {
-            PropertyInfo[] pinfo = typeof(T).GetProperties();
-            SqlMetaData[] md = GetSQLClassMetaData(typeof(T));
-            List<SqlDataRecord> drl = new List<SqlDataRecord>();
-            if ((data != null) && (data.Count() > 0))
-            {
-                foreach (T instance in data)
-                {
-                    SqlDataRecord res = new SqlDataRecord(md);
-                    SetValues(pinfo, res, instance);
-                    drl.Add(res);
-                }
-            }
-            return drl;
-        }
-
         private static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(string typeName, IEnumerable<T> data)
         {
             SqlMapper.ICustomQueryParameter res = null;
@@ -333,36 +314,11 @@ namespace FMSoftlab.Dapper.Extensions
             return res;
         }
 
-        private static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(string typeName, ICollection<T> data)
-        {
-            SqlMapper.ICustomQueryParameter res = null;
-            if (data != null)
-            {
-                var sqlDataRecords = GetSqlDataRecords(data);
-                if (sqlDataRecords?.Count() > 0)
-                {
-                    res = sqlDataRecords.AsTableValuedParameter(typeName);
-                }
-            }
-            return res;
-        }
         public static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(this IEnumerable<T> data, string typeName)
         {
             return GetTableValuedParam(typeName, data);
         }
-        public static SqlMapper.ICustomQueryParameter GetTableValuedParam<T>(this ICollection<T> data, string typeName)
-        {
-            return GetTableValuedParam(typeName, data);
-        }
         public static void AddTableValuedParam<T>(this DynamicParameters dyn, string paramName, string typeName, IEnumerable<T> data)
-        {
-            if (data != null)
-            {
-                SqlMapper.ICustomQueryParameter param = data.GetTableValuedParam(typeName);
-                dyn.Add(name: paramName, value: param, direction: ParameterDirection.Input);
-            }
-        }
-        public static void AddTableValuedParam<T>(this DynamicParameters dyn, string paramName, string typeName, ICollection<T> data)
         {
             if (data != null)
             {
