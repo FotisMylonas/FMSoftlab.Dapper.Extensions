@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.Reflection;
 using Dapper;
 using System.Text;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
-using Microsoft.Data.SqlClient.Server;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.SqlServer.Server;
 
 namespace FMSoftlab.Dapper.Extensions
 {
