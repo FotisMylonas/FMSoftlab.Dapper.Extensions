@@ -8,7 +8,7 @@ using Dapper;
 using System.Text;
 using System.Data;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.SqlServer.Server;
+using Microsoft.Data.SqlClient.Server;
 
 namespace FMSoftlab.Dapper.Extensions
 {
@@ -284,7 +284,7 @@ namespace FMSoftlab.Dapper.Extensions
                 }
             }
         }
-        private static IEnumerable<SqlDataRecord> GetSqlDataRecords<T>(IEnumerable<T> data)
+        private static List<SqlDataRecord> GetSqlDataRecords<T>(IEnumerable<T> data)
         {
             PropertyInfo[] pinfo = typeof(T).GetProperties();
             SqlMetaData[] md = GetSQLClassMetaData(typeof(T));

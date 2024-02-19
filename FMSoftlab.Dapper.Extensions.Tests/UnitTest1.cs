@@ -4,6 +4,9 @@ using Dapper;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Data.SqlClient;
+using System.Data;
+using Microsoft.Data.SqlClient.Server;
+using System.Linq;
 
 namespace FMSoftlab.Dapper.Extensions.Tests
 {
@@ -19,6 +22,16 @@ namespace FMSoftlab.Dapper.Extensions.Tests
     }
     public class UnitTest1
     {
+        private static IEnumerable<SqlDataRecord> CreateSqlDataRecords(IEnumerable<ListItem> list)
+        {
+            var metaData = new SqlMetaData("id", SqlDbType.NVarChar, 5);
+            var record = new SqlDataRecord(metaData);
+            foreach (var item in list)
+            {
+                record.SetString(0, item.Id);
+                yield return record;
+            }
+        }
         [Fact]
         public void Test1()
         {
@@ -29,9 +42,9 @@ namespace FMSoftlab.Dapper.Extensions.Tests
                 {
                     con.Execute("create type dbo.idlist as table (id nvarchar(5))");
                     DynamicParameters dyn = new DynamicParameters();
-                    IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
-                    dyn.Add("idlist", idlist.GetTableValuedParam<ListItem>("dbo.idlist"));
-                    var results = con.Query<string>(@"select id from @idlist idlist", dyn).AsList<string>();
+                    List<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
+                    dyn.Add("idlist", idlist.GetTableValuedParam("dbo.idlist"));
+                    var results = con.Query<string>(@"select id from @idlist idlist", dyn).ToList<string>();
                     Assert.Equal("1", results[0]);
                     Assert.Equal("2", results[1]);
                 }
@@ -52,7 +65,7 @@ namespace FMSoftlab.Dapper.Extensions.Tests
                 {
                     con.Execute("create type dbo.idlist as table (id nvarchar(5))");
                     DynamicParameters dyn = new DynamicParameters();
-                    IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
+                    List<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
                     dyn.AddTableValuedParam<ListItem>("idlist", "dbo.idlist", idlist);
                     var results = con.Query<string>(@"select id from @idlist idlist", dyn).AsList<string>();
                     Assert.Equal("1", results[0]);
