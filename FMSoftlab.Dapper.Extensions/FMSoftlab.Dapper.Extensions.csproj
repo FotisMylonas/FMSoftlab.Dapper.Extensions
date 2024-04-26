@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>FMSoftlab.Dapper.Extensions</Title>
+    <PackageProjectUrl>https://github.com/FotisMylonas/FMSoftlab.Dapper.Extensions</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
