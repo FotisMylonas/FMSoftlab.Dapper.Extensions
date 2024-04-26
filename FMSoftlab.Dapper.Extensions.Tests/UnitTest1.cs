@@ -16,6 +16,13 @@ namespace FMSoftlab.Dapper.Extensions.Tests
         public string Id { get; set; }
     }
 
+    public class DecimalListItem
+    {
+        [DBAttributeDecimal(18, 4)]
+        public decimal Id { get; set; }
+    }
+
+
     public class DapperCallParameters
     {
         public SqlMapper.ICustomQueryParameter IdList { get; set; }
@@ -121,6 +128,31 @@ namespace FMSoftlab.Dapper.Extensions.Tests
                     var results = con.Query<string>(@"select id from @idlist idlist", parameters).AsList<string>();
                     Assert.Equal("1", results[0]);
                     Assert.Equal("2", results[1]);
+                }
+                finally
+                {
+                    con.Execute("drop type dbo.idlist");
+                }
+            }
+        }
+
+        [Fact]
+        public void TestDecimals()
+        {
+            using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
+            {
+                con.Open();
+                try
+                {
+                    con.Execute("create type dbo.idlist as table (id decimal(18,4))");
+                    IEnumerable<DecimalListItem> idlist = new List<DecimalListItem>() { new DecimalListItem { Id = 128.4M }, new DecimalListItem { Id = 129.456M } };
+                    DapperCallParameters parameters = new()
+                    {
+                        IdList = idlist.GetTableValuedParam<DecimalListItem>("dbo.idlist")
+                    };
+                    var results = con.Query<decimal>(@"select id from @idlist idlist", parameters).AsList<decimal>();
+                    Assert.Equal(128.4M, results[0]);
+                    Assert.Equal(129.456M, results[1]);
                 }
                 finally
                 {

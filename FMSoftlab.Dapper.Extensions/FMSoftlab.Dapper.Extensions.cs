@@ -217,10 +217,10 @@ namespace FMSoftlab.Dapper.Extensions
                         {
                             MaxLengthAttribute dba = (MaxLengthAttribute)a;
                             maxlen = dba.Length;
-                        }
-                        if (maxlen <= 0 || maxlen == int.MaxValue)
-                        {
-                            isnvarcharmax = true;
+                            if (maxlen <= 0 || maxlen == int.MaxValue)
+                            {
+                                isnvarcharmax = true;
+                            }
                         }
                         if (a is DBAttributeDecimal)
                         {
@@ -243,14 +243,18 @@ namespace FMSoftlab.Dapper.Extensions
                         t = TypeToDbType.GetSqlDbTypeFromType(prop.PropertyType);
                     }
                     SqlMetaData md;
-                    if ((maxlen > 0) || (isnvarcharmax))
+                    if (
+                        ((t==SqlDbType.NVarChar)
+                        || (t==SqlDbType.VarChar)
+                        || (t==SqlDbType.NChar)
+                        || (t==SqlDbType.Char)
+                        )&& ((maxlen > 0) || (isnvarcharmax)))
                     {
                         md = new SqlMetaData(prop.Name, t, (isnvarcharmax) ? SqlMetaData.Max : maxlen);
                     }
-                    else
-                    if ((precision > 0) || (scale > 0))
+                    else if (t==SqlDbType.Decimal || t==SqlDbType.Float)
                     {
-                        md = new SqlMetaData(prop.Name, t, precision: precision, scale: scale);
+                        md = new SqlMetaData(prop.Name, dbType: t, precision: precision, scale: scale);
                     }
                     else
                     {
