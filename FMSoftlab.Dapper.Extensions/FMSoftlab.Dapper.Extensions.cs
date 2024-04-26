@@ -222,6 +222,20 @@ namespace FMSoftlab.Dapper.Extensions
                                 isnvarcharmax = true;
                             }
                         }
+                        if (a is DBAttributeMaxLen)
+                        {
+                            DBAttributeMaxLen dba = (DBAttributeMaxLen)a;
+                            maxlen = dba.MaxLength;
+                            if (maxlen <= 0 || maxlen == int.MaxValue)
+                            {
+                                isnvarcharmax = true;
+                            }
+                        }
+                        if (a is DBAttributeNVarcharMax)
+                        {
+                            DBAttributeNVarcharMax dba = (DBAttributeNVarcharMax)a;
+                            isnvarcharmax = true;
+                        }
                         if (a is DBAttributeDecimal)
                         {
                             DBAttributeDecimal dbd = (DBAttributeDecimal)a;
