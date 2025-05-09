@@ -35,8 +35,10 @@ namespace FMSoftlab.Dapper.Extensions.Tests
     {
         public SqlMapper.ICustomQueryParameter IdList { get; set; }
     }
-    public class UnitTest1
+    public class DapperExtensionsTests
     {
+
+
         private static IEnumerable<SqlDataRecord> CreateSqlDataRecords(IEnumerable<ListItem> list)
         {
             var metaData = new SqlMetaData("id", SqlDbType.NVarChar, 5);
@@ -149,26 +151,27 @@ namespace FMSoftlab.Dapper.Extensions.Tests
         }
 
         [Fact]
-        public void TestDecimals()
+        public async Task TestDecimals()
         {
+            string typeName = "dbo.idlist_TestDecimals";
             IEnumerable<DecimalListItem> idlist = new List<DecimalListItem>() { new DecimalListItem { Id = 128.4M }, new DecimalListItem { Id = 129.456M } };
             using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
             {
                 con.Open();
                 try
                 {
-                    con.Execute("create type dbo.idlist as table (id decimal(18,4))");
+                    await con.ExecuteAsync($"create type {typeName} as table (id decimal(18,4))");
                     DapperCallParameters parameters = new()
                     {
-                        IdList = idlist.GetTableValuedParam<DecimalListItem>("dbo.idlist")
+                        IdList = idlist.GetTableValuedParam<DecimalListItem>(typeName)
                     };
-                    var results = con.Query<decimal>(@"select id from @idlist idlist", parameters).AsList<decimal>();
+                    var results = (await con.QueryAsync<decimal>(@"select id from @idlist idlist", parameters)).ToList();
                     Assert.Equal(128.4M, results[0]);
                     Assert.Equal(129.456M, results[1]);
                 }
                 finally
                 {
-                    con.Execute("drop type dbo.idlist");
+                    await con.ExecuteAsync($"drop type {typeName}");
                 }
             }
         }
