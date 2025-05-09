@@ -86,7 +86,6 @@ namespace FMSoftlab.Dapper.Extensions
             [typeof(Guid?)] = DbType.Guid,
             [typeof(DateTime?)] = DbType.DateTime,
             [typeof(DateTimeOffset?)] = DbType.DateTimeOffset
-            //,[typeof(System.Data.Linq.Binary)] = DbType.Binary;
         };
 
         public static readonly Dictionary<Type, SqlDbType> sqldbtypeMap = new Dictionary<Type, SqlDbType>()
@@ -109,7 +108,6 @@ namespace FMSoftlab.Dapper.Extensions
             [typeof(Guid)] = SqlDbType.UniqueIdentifier,
             [typeof(DateTime)] = SqlDbType.DateTime,
             [typeof(DateTimeOffset)] = SqlDbType.DateTimeOffset,
-            [typeof(byte[])] = SqlDbType.VarBinary,
             [typeof(byte?)] = SqlDbType.TinyInt,
             [typeof(sbyte?)] = SqlDbType.SmallInt,
             [typeof(short?)] = SqlDbType.SmallInt,
@@ -125,8 +123,8 @@ namespace FMSoftlab.Dapper.Extensions
             [typeof(char?)] = SqlDbType.Char,
             [typeof(Guid?)] = SqlDbType.UniqueIdentifier,
             [typeof(DateTime?)] = SqlDbType.DateTime,
-            [typeof(DateTimeOffset?)] = SqlDbType.DateTimeOffset
-            //,[typeof(System.Data.Linq.Binary)] = DbType.Binary;
+            [typeof(DateTimeOffset?)] = SqlDbType.DateTimeOffset,
+            [typeof(byte[])] = SqlDbType.VarBinary
         };
 
         public static DbType GetDBTypeFromType(Type T)
@@ -270,6 +268,10 @@ namespace FMSoftlab.Dapper.Extensions
                     else if (t==SqlDbType.Decimal || t==SqlDbType.Float)
                     {
                         md = new SqlMetaData(prop.Name, dbType: t, precision: precision, scale: scale);
+                    }
+                    else if (t==SqlDbType.VarBinary)
+                    {
+                        md = new SqlMetaData(prop.Name, t, isnvarcharmax ? -1 : maxlen);
                     }
                     else
                     {

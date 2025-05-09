@@ -7,6 +7,9 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.Data.SqlClient.Server;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FMSoftlab.Dapper.Extensions.Tests
 {
@@ -22,6 +25,11 @@ namespace FMSoftlab.Dapper.Extensions.Tests
         public decimal Id { get; set; }
     }
 
+    public class VarBinaryMaxItem
+    {
+        [MaxLength]
+        public byte[] Content { get; set; }
+    }
 
     public class DapperCallParameters
     {
@@ -40,90 +48,94 @@ namespace FMSoftlab.Dapper.Extensions.Tests
             }
         }
         [Fact]
-        public void Test1()
+        public async Task Test_DynamicParameters_GetTableValuedParam()
         {
+            string typeName = "dbo.idlist";
+            List<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
             using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
             {
                 con.Open();
                 try
                 {
-                    con.Execute("create type dbo.idlist as table (id nvarchar(5))");
+                    await con.ExecuteAsync($"create type {typeName} as table (id nvarchar(5))");
                     DynamicParameters dyn = new DynamicParameters();
-                    List<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
-                    dyn.Add("idlist", idlist.GetTableValuedParam("dbo.idlist"));
-                    var results = con.Query<string>(@"select id from @idlist idlist", dyn).ToList<string>();
+                    dyn.Add("idlist", idlist.GetTableValuedParam(typeName));
+                    var results = (await con.QueryAsync<string>(@"select id from @idlist idlist", dyn)).ToList();
                     Assert.Equal("1", results[0]);
                     Assert.Equal("2", results[1]);
                 }
                 finally
                 {
-                    con.Execute("drop type dbo.idlist");
+                    await con.ExecuteAsync($"drop type {typeName}");
                 }
             }
         }
 
         [Fact]
-        public void Test2()
+        public async Task Test_DynamicParameters_AddTableValuedParam()
         {
+            string typeName = "dbo.idlist2";
+            List<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
             using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
             {
                 con.Open();
                 try
                 {
-                    con.Execute("create type dbo.idlist as table (id nvarchar(5))");
+                    await con.ExecuteAsync($"create type {typeName} as table (id nvarchar(5))");
                     DynamicParameters dyn = new DynamicParameters();
-                    List<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
-                    dyn.AddTableValuedParam<ListItem>("idlist", "dbo.idlist", idlist);
-                    var results = con.Query<string>(@"select id from @idlist idlist", dyn).AsList<string>();
+                    dyn.AddTableValuedParam<ListItem>("idlist", typeName, idlist);
+                    var results = (await con.QueryAsync<string>(@"select id from @idlist idlist", dyn)).ToList();
                     Assert.Equal("1", results[0]);
                     Assert.Equal("2", results[1]);
                 }
                 finally
                 {
-                    con.Execute("drop type dbo.idlist");
+                    await con.ExecuteAsync($"drop type {typeName}");
                 }
             }
         }
 
         [Fact]
-        public void Test3()
+        public async Task Test_Anonymous_Object_Param()
         {
+            string typeName = "dbo.idlist_Anonymous_Object_Param";
+            IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
             using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
             {
                 con.Open();
                 try
                 {
-                    con.Execute("create type dbo.idlist as table (id nvarchar(5))");
-                    IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
+                    await con.ExecuteAsync($"create type {typeName} as table (id nvarchar(5))");
                     var parameters = new
                     {
-                        IdList = idlist.GetTableValuedParam<ListItem>("dbo.idlist")
+                        IdList = idlist.GetTableValuedParam<ListItem>(typeName)
                     };
-                    var results = con.Query<string>(@"select id from @idlist idlist", parameters).AsList<string>();
+                    var results = (await con.QueryAsync<string>(@"select id from @idlist idlist", parameters)).ToList();
                     Assert.Equal("1", results[0]);
                     Assert.Equal("2", results[1]);
                 }
                 finally
                 {
-                    con.Execute("drop type dbo.idlist");
+                    await con.ExecuteAsync($"drop type {typeName}");
                 }
             }
         }
 
 
         [Fact]
-        public void Test4()
+        public async Task Test4_SqlMapper_ICustomQueryParameter_GetTableValuedParam()
         {
+            string typeName = "dbo.idlist_Test4";
+            IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
             using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
             {
                 con.Open();
                 try
                 {
-                    con.Execute("create type dbo.idlist as table (id nvarchar(5))");
-                    IEnumerable<ListItem> idlist = new List<ListItem>() { new ListItem { Id = "1" }, new ListItem { Id = "2" } };
+                    await con.ExecuteAsync($"create type {typeName} as table (id nvarchar(5))");
                     DapperCallParameters parameters = new()
                     {
-                        IdList = idlist.GetTableValuedParam<ListItem>("dbo.idlist")
+                        IdList = idlist.GetTableValuedParam<ListItem>(typeName)
                     };
                     var results = con.Query<string>(@"select id from @idlist idlist", parameters).AsList<string>();
                     Assert.Equal("1", results[0]);
@@ -131,7 +143,7 @@ namespace FMSoftlab.Dapper.Extensions.Tests
                 }
                 finally
                 {
-                    con.Execute("drop type dbo.idlist");
+                    await con.ExecuteAsync($"drop type {typeName}");
                 }
             }
         }
@@ -139,13 +151,13 @@ namespace FMSoftlab.Dapper.Extensions.Tests
         [Fact]
         public void TestDecimals()
         {
+            IEnumerable<DecimalListItem> idlist = new List<DecimalListItem>() { new DecimalListItem { Id = 128.4M }, new DecimalListItem { Id = 129.456M } };
             using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
             {
                 con.Open();
                 try
                 {
                     con.Execute("create type dbo.idlist as table (id decimal(18,4))");
-                    IEnumerable<DecimalListItem> idlist = new List<DecimalListItem>() { new DecimalListItem { Id = 128.4M }, new DecimalListItem { Id = 129.456M } };
                     DapperCallParameters parameters = new()
                     {
                         IdList = idlist.GetTableValuedParam<DecimalListItem>("dbo.idlist")
@@ -157,6 +169,35 @@ namespace FMSoftlab.Dapper.Extensions.Tests
                 finally
                 {
                     con.Execute("drop type dbo.idlist");
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Test_VarBinaryMax()
+        {
+            string typeName = "dbo.idlist_Test_VarBinaryMax";
+            IEnumerable<VarBinaryMaxItem> idlist = new List<VarBinaryMaxItem>() {
+                new VarBinaryMaxItem { Content=Encoding.UTF8.GetBytes("Hallo World 1!") },
+                new VarBinaryMaxItem { Content=Encoding.UTF8.GetBytes("Hallo World 2!") },
+            };
+            using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=tempdb; Trusted_Connection=True;"))
+            {
+                con.Open();
+                try
+                {
+                    con.Execute($"create type {typeName} as table (content varbinary(max))");
+                    DapperCallParameters parameters = new()
+                    {
+                        IdList = idlist.GetTableValuedParam<VarBinaryMaxItem>(typeName)
+                    };
+                    var results = (await con.QueryAsync<byte[]>(@"select Content from @idlist idlist", parameters))?.ToList();
+                    Assert.Equal("Hallo World 1!", Encoding.UTF8.GetString(results[0]));
+                    Assert.Equal("Hallo World 2!", Encoding.UTF8.GetString(results[1]));
+                }
+                finally
+                {
+                    con.Execute($"drop type {typeName}");
                 }
             }
         }
